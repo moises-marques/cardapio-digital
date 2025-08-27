@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cardápio Online</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 24px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 16px; }
+    .item { border: 1px solid #ddd; border-radius: 12px; padding: 12px; }
+    .preco { font-weight: 700; }
+    .promo { text-decoration: line-through; opacity: .6; margin-left: 8px; }
+    img { width: 100%; height: 140px; object-fit: cover; border-radius: 10px; }
+    .categoria { font-size: 12px; opacity: .7; }
+  </style>
+</head>
+<body>
+  <h1>Cardápio</h1>
+  <div id="lista" class="grid"></div>
+
+  <script>
+    // COLE AQUI O LINK DO APPS SCRIPT QUE VOCÊ ACABOU DE COPIAR
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxbSt1bb0g0bZWAFKdjCkH6VGa4KUr0z5NAO8qc7hzFnY96ERfHuBgGK3WfOHtT1FIt/exec';
+
+    fetch(API_URL)
+      .then(r => r.json())
+      .then(data => {
+        const ativos = data.filter(x => (x.Ativo||'').toLowerCase()==='sim');
+        const el = document.getElementById('lista');
+        el.innerHTML = ativos.map(x => {
+          const preco = x['Preço'] || '';
+          const promo = x['Preço Promo'] || '';
+          const temPromo = promo && Number(promo.replace(',','.')) < Number(preco.replace(',','.'));
+          return `
+            <div class="item">
+              ${x.FotoURL ? `<img src="${x.FotoURL}" alt="${x.Produto}"/>` : ``}
+              <div class="categoria">${x.Categoria||''}</div>
+              <h3>${x.Produto||''}</h3>
+              <p>${x.Descrição||''}</p>
+              <div>
+                <span class="preco">R$ ${temPromo ? promo : preco}</span>
+                ${temPromo ? `<span class="promo">R$ ${preco}</span>` : ``}
+              </div>
+            </div>`;
+        }).join('');
+      })
+      .catch(err => console.error('Erro ao carregar dados:', err));
+  </script>
+</body>
+</html>
